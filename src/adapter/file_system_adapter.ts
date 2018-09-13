@@ -1,4 +1,4 @@
-import {MetricEntry, MetricType} from '@process-engine/metrics_api_contracts';
+import {Metric, MetricMeasurementPoint} from '@process-engine/metrics_api_contracts';
 
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
@@ -38,13 +38,13 @@ export async function ensureDirectoryExists(targetFilePath: string): Promise<voi
 }
 
 /**
- * Writes the given entry to the specificed log file.
+ * Writes the given entry to the specificed file.
  *
  * @async
  * @param targetFilePath The path to the file to write to.
  * @param entry          The entry to write into the file.
  */
-export async function writeToLogFile(targetFilePath: string, entry: string): Promise<void> {
+export async function writeToFile(targetFilePath: string, entry: string): Promise<void> {
 
   const filePathWithExtension: string = `${targetFilePath}.met`;
 
@@ -64,102 +64,102 @@ export async function writeToLogFile(targetFilePath: string, entry: string): Pro
 
 /**
  * Reads all files from the given directory and parses their content into
- * readable LogEntries.
+ * readable metrics.
  *
  * @param dirPath The path to the directory to read.
- * @returns       The parsed logs.
+ * @returns       The parsed metrics.
  */
-export function readAndParseDirectory(dirPath: string): Array<MetricEntry> {
+export function readAndParseDirectory(dirPath: string): Array<Metric> {
 
-  const logfileNames: Array<string> = fs.readdirSync(dirPath);
+  const fileNames: Array<string> = fs.readdirSync(dirPath);
 
-  const correlationLogs: Array<MetricEntry> = [];
+  const metrics: Array<Metric> = [];
 
-  for (const fileName of logfileNames) {
+  for (const fileName of fileNames) {
     const fullFilePath: string = path.join(dirPath, fileName);
-    const logFileEntries: Array<MetricEntry> = readAndParseFile(fullFilePath);
-    Array.prototype.push.apply(correlationLogs, logFileEntries);
+    const entries: Array<Metric> = readAndParseFile(fullFilePath);
+    Array.prototype.push.apply(metrics, entries);
   }
 
-  return correlationLogs;
+  return metrics;
 }
 
 /**
  * Reads a file from the given path and parses its content into a readable
- * LogEntry.
+ * metrics.
  *
  * @param   filePath The path to the file to read.
- * @returns          The parsed log.
+ * @returns          The parsed metrics.
  */
-export function readAndParseFile(filePath: string): Array<MetricEntry> {
+export function readAndParseFile(filePath: string): Array<Metric> {
 
-  const logFileContent: string = fs.readFileSync(filePath, 'utf-8');
+  const fileContent: string = fs.readFileSync(filePath, 'utf-8');
 
-  const logEntriesRaw: Array<string> = logFileContent.split('\n');
+  const entriesRaw: Array<string> = fileContent.split('\n');
 
   // Filter out empty lines and the final new line.
-  const logEntriesFiltered: Array<string> = logEntriesRaw.filter((entry: string) => {
+  const filteredEntries: Array<string> = entriesRaw.filter((entry: string) => {
     return entry.length > 0;
   });
 
-  const logEntries: Array<MetricEntry> = logEntriesFiltered.map(_createLogEntryFromRawData);
+  const metrics: Array<Metric> = filteredEntries.map(_createMetricFromRawData);
 
-  return logEntries;
+  return metrics;
 }
 
 /**
- * Takes a string representing a log entry and parses its content into a usable
- * LogEntry object.
+ * Takes a string representing a metric and parses its content into a usable
+ * Metric-object.
  *
- * @param   logEntryRaw The string containing the unparsed log entry.
- * @returns             The parsed LogEntry.
+ * @param   metricRaw The string containing the unparsed metric.
+ * @returns           The parsed Metric.
  */
 // tslint:disable:no-magic-numbers
-function _createLogEntryFromRawData(logEntryRaw: string): MetricEntry {
+function _createMetricFromRawData(metricRaw: string): Metric {
 
-  const logEntryRawParts: Array<string> = logEntryRaw.split('\t');
+  const metricRawParts: Array<string> = metricRaw.split('\t');
 
-  const isFlowNodeInstanceLog: boolean = logEntryRawParts.length === 7;
+  const isFlowNodeInstanceMetric: boolean = metricRawParts[0] === 'FlowNodeInstance';
 
-  const logEntry: MetricEntry = isFlowNodeInstanceLog
-    ? _parseFlowNodeInstanceLog(logEntryRawParts)
-    : _parseProcessModelLog(logEntryRawParts);
+  const metric: Metric = isFlowNodeInstanceMetric
+    ? _parseFlowNodeInstanceMetric(metricRawParts)
+    : _parseProcessModelMetric(metricRawParts);
 
-  return logEntry;
+  return metric;
 }
 
 /**
- * Creates a LogEntry for a FlowNodeInstance from the given data.
+ * Creates a Metric for a FlowNodeInstance from the given data.
  *
- * @param   rawData The data to parse into a LogEntry.
- * @returns         The parsed LogEntry.
+ * @param   rawData The data to parse into a Metric.
+ * @returns         The parsed Metric.
  */
-function _parseFlowNodeInstanceLog(rawData: Array<string>): MetricEntry {
+function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
 
-  const logEntry: MetricEntry = new MetricEntry();
-  logEntry.timeStamp = new Date(rawData[0]);
-  logEntry.correlationId = rawData[1];
-  logEntry.processModelId = rawData[2];
-  logEntry.flowNodeInstanceId = rawData[3];
-  logEntry.flowNodeId = rawData[4];
-  logEntry.metricType = MetricType[rawData[6]];
+  const metric: Metric = new Metric();
+  metric.timeStamp = new Date(rawData[1]);
+  metric.correlationId = rawData[2];
+  metric.processModelId = rawData[3];
+  metric.flowNodeInstanceId = rawData[4];
+  metric.flowNodeId = rawData[5];
+  metric.metricType = MetricMeasurementPoint[rawData[6]];
 
-  return logEntry;
+  return metric;
 }
 
 /**
- * Creates a LogEntry for a ProcessModel from the given data.
+ * Creates a Metric for a ProcessModel from the given data.
  *
- * @param   rawData The data to parse into a LogEntry.
- * @returns         The parsed LogEntry.
+ * @param   rawData The data to parse into a Metric.
+ * @returns         The parsed Metric.
  */
-function _parseProcessModelLog(rawData: Array<string>): MetricEntry {
+function _parseProcessModelMetric(rawData: Array<string>): Metric {
 
-  const logEntry: MetricEntry = new MetricEntry();
-  logEntry.timeStamp = new Date(rawData[0]);
-  logEntry.correlationId = rawData[1];
-  logEntry.processModelId = rawData[2];
-  logEntry.metricType = MetricType[rawData[4]];
+  const metric: Metric = new Metric();
+  metric.timeStamp = new Date(rawData[0]);
+  metric.correlationId = rawData[1];
+  metric.processModelId = rawData[2];
+  metric.metricType = MetricMeasurementPoint[rawData[4]];
 
-  return logEntry;
+  return metric;
 }

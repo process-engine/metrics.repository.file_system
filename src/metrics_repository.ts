@@ -1,4 +1,4 @@
-import {IMetricsRepository, MetricEntry, MetricType} from '@process-engine/metrics_api_contracts';
+import {IMetricsRepository, Metric, MetricMeasurementPoint, ProcessToken} from '@process-engine/metrics_api_contracts';
 
 import * as path from 'path';
 
@@ -8,52 +8,76 @@ export class MetricsRepository implements IMetricsRepository {
 
   public config: any;
 
-  public async readMetricsForProcessModel(processModelId: string): Promise<Array<MetricEntry>> {
+  public async readMetricsForProcessModel(processModelId: string): Promise<Array<Metric>> {
 
     const fileNameWithExtension: string = `${processModelId}.met`;
 
-    const logFilePath: string = this._buildPath(fileNameWithExtension);
+    const metricFilePath: string = this._buildPath(fileNameWithExtension);
 
-    const logFileExists: boolean = FileSystemAdapter.targetExists(logFilePath);
-    if (!logFileExists) {
+    const metricFileExists: boolean = FileSystemAdapter.targetExists(metricFilePath);
+    if (!metricFileExists) {
       return [];
     }
 
-    const correlationLogs: Array<MetricEntry> = FileSystemAdapter.readAndParseFile(logFilePath);
+    const metrics: Array<Metric> = FileSystemAdapter.readAndParseFile(metricFilePath);
 
-    return correlationLogs;
+    return metrics;
   }
 
   public async writeMetricForProcessModel(correlationId: string,
                                           processModelId: string,
-                                          metricType: MetricType,
-                                          timestamp: Date): Promise<void> {
+                                          metricType: MetricMeasurementPoint,
+                                          timestamp: Date,
+                                          error?: Error): Promise<void> {
 
-    const logEntryAsString: string = [timestamp, correlationId, processModelId, metricType].join('\t');
-    await this._writeLogEntryToFileSystem(correlationId, processModelId, logEntryAsString);
+    const metricValues: Array<string> = ['ProcessModel', timestamp.toString(), correlationId, processModelId, metricType];
+
+    if (error) {
+      const stringifiedError: string = JSON.stringify(error);
+      metricValues.push(stringifiedError);
+    }
+
+    await this._writeMetricToFileSystem(correlationId, processModelId, ...metricValues);
   }
 
   public async writeMetricForFlowNode(correlationId: string,
                                       processModelId: string,
                                       flowNodeInstanceId: string,
                                       flowNodeId: string,
-                                      metricType: MetricType,
-                                      timestamp: Date): Promise<void> {
+                                      metricType: MetricMeasurementPoint,
+                                      token: ProcessToken,
+                                      timestamp: Date,
+                                      error?: Error): Promise<void> {
 
-    const logEntryAsString: string = [timestamp, correlationId, processModelId, flowNodeInstanceId, flowNodeId, metricType].join('\t');
-    await this._writeLogEntryToFileSystem(correlationId, processModelId, logEntryAsString);
+    const stringyfiedToken: string = JSON.stringify(token);
+
+    const metricValues: Array<string> =
+      ['FlowNodeInstance', timestamp.toString(), correlationId, processModelId, flowNodeInstanceId, flowNodeId, metricType, stringyfiedToken];
+
+    if (error) {
+      const stringifiedError: string = JSON.stringify(error);
+      metricValues.push(stringifiedError);
+    }
+
+    await this._writeMetricToFileSystem(correlationId, processModelId, ...metricValues);
   }
 
-  private async _writeLogEntryToFileSystem(correlationId: string, processModelId: string, entry: string): Promise<void> {
+  private async _writeMetricToFileSystem(correlationId: string, processModelId: string, ...metricValues: Array<string>): Promise<void> {
+
+    const metricAsString: string = this._buildMetricString(...metricValues);
 
     const targetFilePath: string = this._buildPath(correlationId, processModelId);
 
     await FileSystemAdapter.ensureDirectoryExists(targetFilePath);
-    await FileSystemAdapter.writeToLogFile(targetFilePath, entry);
+    await FileSystemAdapter.writeToFile(targetFilePath, metricAsString);
   }
 
   private _buildPath(...pathSegments: Array<string>): string {
     return path.resolve(process.cwd(), this.config.log_output_path, ...pathSegments);
+  }
+
+  private _buildMetricString(...args: Array<string>): string {
+    return args.join('\t');
   }
 
 }
