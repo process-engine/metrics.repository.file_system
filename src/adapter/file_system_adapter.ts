@@ -46,10 +46,8 @@ export async function ensureDirectoryExists(targetFilePath: string): Promise<voi
  */
 export async function writeToFile(targetFilePath: string, entry: string): Promise<void> {
 
-  const filePathWithExtension: string = `${targetFilePath}.met`;
-
   return new Promise<void>((resolve: Function, reject: Function): void => {
-    const fileStream: fs.WriteStream = fs.createWriteStream(filePathWithExtension, {flags: 'a'});
+    const fileStream: fs.WriteStream = fs.createWriteStream(targetFilePath, {flags: 'a'});
 
      // Note: using "end" instead of "write" will result in the stream being closed immediately afterwards, thus releasing the file.
     fileStream.end(`${entry}\n`, (error: Error) => {

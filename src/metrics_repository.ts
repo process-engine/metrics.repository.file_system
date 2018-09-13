@@ -37,7 +37,7 @@ export class MetricsRepository implements IMetricsRepository {
       metricValues.push(stringifiedError);
     }
 
-    await this._writeMetricToFileSystem(correlationId, processModelId, ...metricValues);
+    await this._writeMetricToFileSystem(processModelId, ...metricValues);
   }
 
   public async writeMetricForFlowNode(correlationId: string,
@@ -59,17 +59,18 @@ export class MetricsRepository implements IMetricsRepository {
       metricValues.push(stringifiedError);
     }
 
-    await this._writeMetricToFileSystem(correlationId, processModelId, ...metricValues);
+    await this._writeMetricToFileSystem(processModelId, ...metricValues);
   }
 
-  private async _writeMetricToFileSystem(correlationId: string, processModelId: string, ...metricValues: Array<string>): Promise<void> {
+  private async _writeMetricToFileSystem(processModelId: string, ...metricValues: Array<string>): Promise<void> {
 
-    const metricAsString: string = this._buildMetricString(...metricValues);
+    const filePathWithExtension: string = `${processModelId}.met`;
+    const targetFilePath: string = this._buildPath(filePathWithExtension);
 
-    const targetFilePath: string = this._buildPath(correlationId, processModelId);
+    const metricEntryAsString: string = this._buildMetricString(...metricValues);
 
     await FileSystemAdapter.ensureDirectoryExists(targetFilePath);
-    await FileSystemAdapter.writeToFile(targetFilePath, metricAsString);
+    await FileSystemAdapter.writeToFile(targetFilePath, metricEntryAsString);
   }
 
   private _buildPath(...pathSegments: Array<string>): string {
