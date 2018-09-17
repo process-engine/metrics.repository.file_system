@@ -1,6 +1,7 @@
-import {IMetricsRepository, Metric, MetricMeasurementPoint, ProcessToken} from '@process-engine/metrics_api_contracts';
-
+import * as moment from 'moment';
 import * as path from 'path';
+
+import {IMetricsRepository, Metric, MetricMeasurementPoint, ProcessToken} from '@process-engine/metrics_api_contracts';
 
 import * as FileSystemAdapter from './adapter';
 
@@ -27,10 +28,10 @@ export class MetricsRepository implements IMetricsRepository {
   public async writeMetricForProcessModel(correlationId: string,
                                           processModelId: string,
                                           metricType: MetricMeasurementPoint,
-                                          timestamp: Date,
+                                          timestamp: moment.Moment,
                                           error?: Error): Promise<void> {
 
-    const metricValues: Array<string> = ['ProcessModel', timestamp.toString(), correlationId, processModelId, metricType];
+    const metricValues: Array<string> = ['ProcessModel', timestamp.toISOString(), correlationId, processModelId, metricType];
 
     if (error) {
       const stringifiedError: string = JSON.stringify(error);
@@ -46,13 +47,13 @@ export class MetricsRepository implements IMetricsRepository {
                                       flowNodeId: string,
                                       metricType: MetricMeasurementPoint,
                                       token: ProcessToken,
-                                      timestamp: Date,
+                                      timestamp: moment.Moment,
                                       error?: Error): Promise<void> {
 
     const stringyfiedToken: string = JSON.stringify(token);
 
     const metricValues: Array<string> =
-      ['FlowNodeInstance', timestamp.toString(), correlationId, processModelId, flowNodeInstanceId, flowNodeId, metricType, stringyfiedToken];
+      ['FlowNodeInstance', timestamp.toISOString(), correlationId, processModelId, flowNodeInstanceId, flowNodeId, metricType, stringyfiedToken];
 
     if (error) {
       const stringifiedError: string = JSON.stringify(error);
