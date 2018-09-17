@@ -2,6 +2,7 @@ import {Metric, MetricMeasurementPoint} from '@process-engine/metrics_api_contra
 
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
+import * as moment from 'moment';
 import * as path from 'path';
 
 export function targetExists(targetPath: string): boolean {
@@ -135,7 +136,7 @@ function _createMetricFromRawData(metricRaw: string): Metric {
 function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
 
   const metric: Metric = new Metric();
-  metric.timeStamp = new Date(rawData[1]);
+  metric.timeStamp = moment(rawData[1]);
   metric.correlationId = rawData[2];
   metric.processModelId = rawData[3];
   metric.flowNodeInstanceId = rawData[4];
@@ -154,7 +155,7 @@ function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
 function _parseProcessModelMetric(rawData: Array<string>): Metric {
 
   const metric: Metric = new Metric();
-  metric.timeStamp = new Date(rawData[0]);
+  metric.timeStamp = moment(rawData[0]);
   metric.correlationId = rawData[1];
   metric.processModelId = rawData[2];
   metric.metricType = MetricMeasurementPoint[rawData[4]];
