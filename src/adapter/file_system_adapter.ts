@@ -116,7 +116,7 @@ export function readAndParseFile(filePath: string): Array<Metric> {
 // tslint:disable:no-magic-numbers
 function _createMetricFromRawData(metricRaw: string): Metric {
 
-  const metricRawParts: Array<string> = metricRaw.split('\t');
+  const metricRawParts: Array<string> = metricRaw.split(';');
 
   const isFlowNodeInstanceMetric: boolean = metricRawParts[0] === 'FlowNodeInstance';
 
@@ -142,6 +142,7 @@ function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
   metric.flowNodeInstanceId = rawData[4];
   metric.flowNodeId = rawData[5];
   metric.metricType = MetricMeasurementPoint[rawData[6]];
+  metric.processToken = JSON.parse(rawData[7]);
 
   return metric;
 }
@@ -158,7 +159,7 @@ function _parseProcessModelMetric(rawData: Array<string>): Metric {
   metric.timeStamp = moment(rawData[0]);
   metric.correlationId = rawData[1];
   metric.processModelId = rawData[2];
-  metric.metricType = MetricMeasurementPoint[rawData[4]];
+  metric.metricType = MetricMeasurementPoint[rawData[6]];
 
   return metric;
 }

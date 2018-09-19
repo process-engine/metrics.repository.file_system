@@ -31,7 +31,8 @@ export class MetricsRepository implements IMetricsRepository {
                                           timestamp: moment.Moment,
                                           error?: Error): Promise<void> {
 
-    const metricValues: Array<string> = ['ProcessModel', timestamp.toISOString(), correlationId, processModelId, metricType];
+    const metricValues: Array<string> =
+      ['ProcessModel', timestamp.toISOString(), correlationId, processModelId, '', '', metricType, '{}'];
 
     if (error) {
       const stringifiedError: string = JSON.stringify(error);
@@ -79,7 +80,7 @@ export class MetricsRepository implements IMetricsRepository {
   }
 
   private _buildMetricString(...args: Array<string>): string {
-    return args.join('\t');
+    return args.join(';');
   }
 
 }
