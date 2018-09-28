@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://www.npmjs.com"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "This repository uses the local file system to access and manipulate log files containing metrics.",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
@@ -13,10 +13,10 @@
     "Christian Werner <christian.werner@5minds.de>"
   ],
   "dependencies": {
-    "@process-engine/metrics_api_contracts": "0.2.0"
+    "@process-engine/metrics_api_contracts": "0.2.1"
   },
   "devDependencies": {
-    "@essential-projects/tslint-config": "1.1.1",
+    "@essential-projects/tslint-config": "1.1.2",
     "@types/node": "8.10.10",
     "@types/sequelize": "4.27.23",
     "gulp": "3.9.1",
