@@ -156,10 +156,10 @@ function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
 function _parseProcessModelMetric(rawData: Array<string>): Metric {
 
   const metric: Metric = new Metric();
-  metric.timeStamp = moment(rawData[0]);
-  metric.correlationId = rawData[1];
-  metric.processModelId = rawData[2];
-  metric.metricType = MetricMeasurementPoint[rawData[6]];
+  metric.timeStamp = moment(rawData[1]);
+  metric.correlationId = rawData[2];
+  metric.processModelId = rawData[3];
+  metric.metricType = MetricMeasurementPoint[rawData[7]];
 
   return metric;
 }
