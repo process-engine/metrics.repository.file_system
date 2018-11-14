@@ -51,11 +51,7 @@ export async function writeToFile(targetFilePath: string, entry: string): Promis
     const fileStream: fs.WriteStream = fs.createWriteStream(targetFilePath, {flags: 'a'});
 
      // Note: using "end" instead of "write" will result in the stream being closed immediately afterwards, thus releasing the file.
-    fileStream.end(`${entry}\n`, (error: Error) => {
-      if (error) {
-        return reject(error);
-      }
-
+    fileStream.end(`${entry}\n`, 'utf-8', () => {
       return resolve();
     });
   });
