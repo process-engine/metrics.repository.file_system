@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://www.npmjs.com"
   },
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "This repository uses the local file system to access and manipulate log files containing metrics.",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
