@@ -17,17 +17,18 @@ export function targetExists(targetPath: string): boolean {
  */
 export async function ensureDirectoryExists(targetFilePath: string): Promise<void> {
 
+  // eslint-disable-next-line consistent-return
   return new Promise<void>((resolve: Function, reject: Function): void => {
 
-    const parsedPath: path.ParsedPath = path.parse(targetFilePath);
+    const parsedPath = path.parse(targetFilePath);
 
-    const targetDirectoryExists: boolean = fs.existsSync(parsedPath.dir);
+    const targetDirectoryExists = fs.existsSync(parsedPath.dir);
 
     if (targetDirectoryExists) {
       return resolve();
     }
 
-    mkdirp(parsedPath.dir, (error: Error, data: string) => {
+    mkdirp(parsedPath.dir, (error: Error, data: string): void => {
 
       if (error) {
         return reject(error);
@@ -48,10 +49,10 @@ export async function ensureDirectoryExists(targetFilePath: string): Promise<voi
 export async function writeToFile(targetFilePath: string, entry: string): Promise<void> {
 
   return new Promise<void>((resolve: Function, reject: Function): void => {
-    const fileStream: fs.WriteStream = fs.createWriteStream(targetFilePath, {flags: 'a'});
+    const fileStream = fs.createWriteStream(targetFilePath, {flags: 'a'});
 
-     // Note: using "end" instead of "write" will result in the stream being closed immediately afterwards, thus releasing the file.
-    fileStream.end(`${entry}\n`, 'utf-8', () => {
+    // Note: using "end" instead of "write" will result in the stream being closed immediately afterwards, thus releasing the file.
+    fileStream.end(`${entry}\n`, 'utf-8', (): void => {
       return resolve();
     });
   });
@@ -66,13 +67,13 @@ export async function writeToFile(targetFilePath: string, entry: string): Promis
  */
 export function readAndParseDirectory(dirPath: string): Array<Metric> {
 
-  const fileNames: Array<string> = fs.readdirSync(dirPath);
+  const fileNames = fs.readdirSync(dirPath);
 
   const metrics: Array<Metric> = [];
 
   for (const fileName of fileNames) {
-    const fullFilePath: string = path.join(dirPath, fileName);
-    const entries: Array<Metric> = readAndParseFile(fullFilePath);
+    const fullFilePath = path.join(dirPath, fileName);
+    const entries = readAndParseFile(fullFilePath);
     Array.prototype.push.apply(metrics, entries);
   }
 
@@ -88,16 +89,16 @@ export function readAndParseDirectory(dirPath: string): Array<Metric> {
  */
 export function readAndParseFile(filePath: string): Array<Metric> {
 
-  const fileContent: string = fs.readFileSync(filePath, 'utf-8');
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
 
-  const entriesRaw: Array<string> = fileContent.split('\n');
+  const entriesRaw = fileContent.split('\n');
 
   // Filter out empty lines and the final new line.
-  const filteredEntries: Array<string> = entriesRaw.filter((entry: string) => {
+  const filteredEntries = entriesRaw.filter((entry: string): boolean => {
     return entry.length > 0;
   });
 
-  const metrics: Array<Metric> = filteredEntries.map(_createMetricFromRawData);
+  const metrics = filteredEntries.map(createMetricFromRawData);
 
   return metrics;
 }
@@ -110,15 +111,15 @@ export function readAndParseFile(filePath: string): Array<Metric> {
  * @returns           The parsed Metric.
  */
 // tslint:disable:no-magic-numbers
-function _createMetricFromRawData(metricRaw: string): Metric {
+function createMetricFromRawData(metricRaw: string): Metric {
 
-  const metricRawParts: Array<string> = metricRaw.split(';');
+  const metricRawParts = metricRaw.split(';');
 
-  const isFlowNodeInstanceMetric: boolean = metricRawParts[0] === 'FlowNodeInstance';
+  const isFlowNodeInstanceMetric = metricRawParts[0] === 'FlowNodeInstance';
 
-  const metric: Metric = isFlowNodeInstanceMetric
-    ? _parseFlowNodeInstanceMetric(metricRawParts)
-    : _parseProcessModelMetric(metricRawParts);
+  const metric = isFlowNodeInstanceMetric
+    ? parseFlowNodeInstanceMetric(metricRawParts)
+    : parseProcessModelMetric(metricRawParts);
 
   return metric;
 }
@@ -129,9 +130,9 @@ function _createMetricFromRawData(metricRaw: string): Metric {
  * @param   rawData The data to parse into a Metric.
  * @returns         The parsed Metric.
  */
-function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
+function parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
 
-  const metric: Metric = new Metric();
+  const metric = new Metric();
   metric.timeStamp = moment(rawData[1]);
   metric.correlationId = rawData[2];
   metric.processModelId = rawData[3];
@@ -149,9 +150,9 @@ function _parseFlowNodeInstanceMetric(rawData: Array<string>): Metric {
  * @param   rawData The data to parse into a Metric.
  * @returns         The parsed Metric.
  */
-function _parseProcessModelMetric(rawData: Array<string>): Metric {
+function parseProcessModelMetric(rawData: Array<string>): Metric {
 
-  const metric: Metric = new Metric();
+  const metric = new Metric();
   metric.timeStamp = moment(rawData[1]);
   metric.correlationId = rawData[2];
   metric.processModelId = rawData[3];
