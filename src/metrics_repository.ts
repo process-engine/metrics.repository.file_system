@@ -97,7 +97,7 @@ export class MetricsRepository implements IMetricsRepository {
   }
 
   private buildPath(...pathSegments: Array<string>): string {
-    return path.resolve(process.cwd(), this.config.outputPath, ...pathSegments);
+    return path.resolve(process.cwd(), this.config.output_path, ...pathSegments);
   }
 
   private buildMetricString(...args: Array<string>): string {
