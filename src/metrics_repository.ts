@@ -2,10 +2,11 @@ import * as moment from 'moment';
 import * as path from 'path';
 
 import {
-  IMetricsRepository, Metric, MetricMeasurementPoint, ProcessToken,
+  IMetricsRepository, Metric, MetricMeasurementPoint,
 } from '@process-engine/metrics_api_contracts';
 
-import * as FileSystemAdapter from './adapter';
+import * as ErrorSerializer from './adapter/error_serializer';
+import * as FileSystemAdapter from './adapter/file_system_adapter';
 
 export class MetricsRepository implements IMetricsRepository {
 
@@ -27,49 +28,64 @@ export class MetricsRepository implements IMetricsRepository {
     return metrics;
   }
 
-  public async writeMetricForProcessModel(
+  public async writeMetricForProcessInstance(
     correlationId: string,
+    processInstanceId: string,
     processModelId: string,
     metricType: MetricMeasurementPoint,
     timestamp: moment.Moment,
     error?: Error,
   ): Promise<void> {
 
-    const metricValues = ['ProcessModel', timestamp.toISOString(), correlationId, processModelId, '', '', metricType, '{}'];
+    const metricValues = [
+      // Required for versioning. This way, old logs will still be readable, because they only started with "ProcessModel".
+      'ProcessModel_V2',
+      timestamp.toISOString(),
+      correlationId,
+      processInstanceId,
+      processModelId,
+      '',
+      '',
+      metricType,
+      '{}',
+      error ? ErrorSerializer.serialize(error) : '',
+    ];
 
-    if (error) {
-      const stringifiedError = JSON.stringify(error);
-      metricValues.push(stringifiedError);
-    }
-
-    await this.writeMetricToFileSystem(processModelId, ...metricValues);
+    await this.writeMetricToFileSystem(processModelId, metricValues);
   }
 
-  public async writeMetricForFlowNode(
+  public async writeMetricForFlowNodeInstance(
     correlationId: string,
+    processInstanceId: string,
     processModelId: string,
     flowNodeInstanceId: string,
     flowNodeId: string,
     metricType: MetricMeasurementPoint,
-    token: ProcessToken,
+    tokenPayload: any,
     timestamp: moment.Moment,
     error?: Error,
   ): Promise<void> {
 
-    const stringyfiedToken = JSON.stringify(token);
+    const stringyfiedToken = JSON.stringify(tokenPayload);
 
-    const metricValues =
-      ['FlowNodeInstance', timestamp.toISOString(), correlationId, processModelId, flowNodeInstanceId, flowNodeId, metricType, stringyfiedToken];
+    const metricValues = [
+      // Required for versioning. This way, old logs will still be readable, because they only started with "FlowNodeInstance".
+      'FlowNodeInstance_V2',
+      timestamp.toISOString(),
+      correlationId,
+      processInstanceId,
+      processModelId,
+      flowNodeInstanceId,
+      flowNodeId,
+      metricType,
+      stringyfiedToken,
+      error ? ErrorSerializer.serialize(error) : '',
+    ];
 
-    if (error) {
-      const stringifiedError = JSON.stringify(error);
-      metricValues.push(stringifiedError);
-    }
-
-    await this.writeMetricToFileSystem(processModelId, ...metricValues);
+    await this.writeMetricToFileSystem(processModelId, metricValues);
   }
 
-  private async writeMetricToFileSystem(processModelId: string, ...metricValues: Array<string>): Promise<void> {
+  private async writeMetricToFileSystem(processModelId: string, metricValues: Array<string>): Promise<void> {
 
     const filePathWithExtension = `${processModelId}.met`;
     const targetFilePath = this.buildPath(filePathWithExtension);
