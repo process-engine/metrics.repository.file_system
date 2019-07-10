@@ -5,6 +5,7 @@ import {
   IMetricsRepository, Metric, MetricMeasurementPoint,
 } from '@process-engine/metrics_api_contracts';
 
+import * as ErrorSerializer from './adapter/error_serializer';
 import * as FileSystemAdapter from './adapter/file_system_adapter';
 
 export class MetricsRepository implements IMetricsRepository {
@@ -47,7 +48,7 @@ export class MetricsRepository implements IMetricsRepository {
       '',
       metricType,
       '{}',
-      error.message,
+      error ? ErrorSerializer.serialize(error) : '',
     ];
 
     await this.writeMetricToFileSystem(processModelId, metricValues);
@@ -78,7 +79,7 @@ export class MetricsRepository implements IMetricsRepository {
       flowNodeId,
       metricType,
       stringyfiedToken,
-      error.message,
+      error ? ErrorSerializer.serialize(error) : '',
     ];
 
     await this.writeMetricToFileSystem(processModelId, metricValues);
