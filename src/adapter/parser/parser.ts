@@ -1,4 +1,4 @@
-import {Metric} from '@atlas-engine/metrics_api.contracts';
+import {Metric} from '@process-engine/metrics_api_contracts';
 
 import {parseFlowNodeInstanceMetric} from './flow_node_metric_parser';
 import {parseProcessModelMetric} from './process_model_metric_parser';

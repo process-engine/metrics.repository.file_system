@@ -1,6 +1,6 @@
 import * as moment from 'moment';
 
-import {Metric, MetricMeasurementPoint} from '@atlas-engine/metrics_api.contracts';
+import {Metric, MetricMeasurementPoint} from '@process-engine/metrics_api_contracts';
 
 import * as ErrorSerializer from '../error_serializer';
 
