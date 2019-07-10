@@ -16,7 +16,7 @@ export function parseProcessModelMetric(metricData: Array<string>): Metric {
 }
 
 /**
- * Parses a metrics string into the old format employed by the ProcessEngine.
+ * Parses a metrics string into the v1 format employed by the ProcessEngine.
  * In this version, errors were only added to the log, if any occured.
  *
  * @param metricData The metrics to parse.
@@ -34,7 +34,7 @@ function parseAsV1(metricData: Array<string>): Metric {
 }
 
 /**
- * Parses a metrics string into the format employed by the AtlasEngine.
+ * Parses a metrics string into the v2 format employed by the ProcessEngine.
  * In this format, the processInstanceId was added.
  * Also, an entry for "error" is always made, even if none occured, to ensure a consistent csv format.
  *
