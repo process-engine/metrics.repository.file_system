@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/process-engine/metrics.repository.file_system#readme",
   "dependencies": {
-    "@process-engine/metrics_api_contracts": "^1.0.0",
+    "@process-engine/metrics_api_contracts": "feature~add_process_instance_id",
     "moment": "^2.24.0"
   },
   "devDependencies": {
