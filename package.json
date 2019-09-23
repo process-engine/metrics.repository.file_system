@@ -1,6 +1,6 @@
 {
   "name": "@process-engine/metrics.repository.file_system",
-  "version": "2.0.0",
+  "version": "2.0.0-beta.1",
   "description": "Contains the file-system repository for the Metrics API. ",
   "main": "dist/commonjs/index.js",
   "typings": "dist/index.d.ts",
