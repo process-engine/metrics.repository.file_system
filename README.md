@@ -1,3 +1,4 @@
-# Metrics Repository - FileSystem Implementation
+# Metrics Repository - DEPRECATED
 
-This repository uses the local file system to access and manipulate metric logfiles.
+This repository has been integrated into the [metrics api](https://github.com/process-engine/metrics_api) repo and is no longer maintained.
+
